@@ -8,8 +8,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 public class KpiApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(KpiApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(KpiApplication.class, args);
+    }
 
 }

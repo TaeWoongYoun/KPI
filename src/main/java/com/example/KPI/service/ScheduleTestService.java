@@ -9,16 +9,22 @@ public class ScheduleTestService {
     private int workCnt = 100;
     private int todayWorkCnt = 120;
 
-    public void Lv1Service() {
+    public String Lv1Service() {
         double sendData = sendDataCalculate();
+        String result = "Lv1 Send - Rate: " + sendData + "%";
+        System.out.println(result);
+        return result;
     }
 
-    public void Lv2Service() {
+    public String Lv2Service() {
         LocalDateTime today = LocalDateTime.now();
+        String result = "Lv2 Send - Prev: " + workCnt + ", Current: " + todayWorkCnt + ", Date: " + today;
+        System.out.println(result);
+        return result;
     }
 
     public double sendDataCalculate() {
-        double upRate = (todayWorkCnt - workCnt) / workCnt * 100;
+        double upRate = ((double)(todayWorkCnt - workCnt) / workCnt) * 100;
         return upRate;
     }
 }
