@@ -23,7 +23,6 @@ public class ScheduleTestController {
         service.Lv2Service();
     }
 
-    // 웹에서 확인: http://localhost:8080/kpi
     @GetMapping("/kpi")
     public String showKPI() {
         String lv1 = service.Lv1Service();
