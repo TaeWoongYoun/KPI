@@ -14,10 +14,10 @@ public class KpiController {
     public String KPI(@RequestBody KpiDto kpiDto) {
         KpiService kpiService = new KpiService();
 
-        kpiService.Lv1Service(kpiDto);
-        kpiService.Lv2Service(kpiDto);
+        boolean lv1Result = kpiService.Lv1Service(kpiDto);
+        boolean lv2Result = kpiService.Lv2Service(kpiDto);
 
-        String sendData = "";
+        String sendData = "Lv1: " + lv1Result + ", Lv2: " + lv2Result;
 
         return sendData;
     }
