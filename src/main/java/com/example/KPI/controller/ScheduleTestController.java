@@ -17,7 +17,7 @@ public class ScheduleTestController {
     }
 
     // 10초마다 자동 실행
-    @Scheduled(fixedRate = 10000)
+//    @Scheduled(fixedRate = 10000)
     public void testSchedule() {
         service.Lv1Service();
         service.Lv2Service();

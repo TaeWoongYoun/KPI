@@ -48,6 +48,12 @@ public class KpiService {
                 kpiDto.getNow_val()
         );
 
+//        System.out.println("계산된 증가율: " + actualRate + "%");
+//
+//        System.out.println("Lv2 데이터: " + lv2.toString());
+//
+//        System.out.println("Lv3 데이터: " + lv3.toString());
+
         // 전송 (헤더는 내일 구현)
         // post(URL, lv2, headers);
         // post(URL, lv3, headers);
