@@ -2,6 +2,7 @@ package com.example.KPI.service;
 
 import com.example.KPI.dto.KpiDto;
 
+// calculator 함수 외부로 빼기
 public class KpiService {
     public boolean Lv1Service(KpiDto kpiDto) {
         double upRate = ((double)(kpiDto.getNow_val() - kpiDto.getBe_val()) / kpiDto.getBe_val()) * 100;
