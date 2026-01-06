@@ -24,7 +24,7 @@ public class KpiService {
         return ((double)(nowVal - beVal) / beVal) * 100;
     }
 
-    // 메인 전송 함수
+    // 메인 전송
     public void sendKpi(KpiDto kpiDto) throws Exception {
         LocalDateTime now = LocalDateTime.now();
         String trsDttm = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
@@ -33,7 +33,7 @@ public class KpiService {
         // 증가율 계산
         double actualRate = calculateRate(kpiDto.getBe_val(), kpiDto.getNow_val());
 
-        // Lv2 데이터 생성 (증가율)
+        // Lv2 데이터 생성
         JSONObject lv2 = buildLv2(
                 ocrDttm,
                 trsDttm,
@@ -41,13 +41,14 @@ public class KpiService {
                 kpiDto.getTarget_rate()
         );
 
-        // Lv3 데이터 생성 (실제 생산량)
+        // Lv3 데이터 생성
         JSONObject lv3 = buildLv3(
                 ocrDttm,
                 trsDttm,
                 kpiDto.getNow_val()
         );
 
+// 출력결과 테스트
 //        System.out.println("계산된 증가율: " + actualRate + "%");
 //
 //        System.out.println("Lv2 데이터: " + lv2.toString());
@@ -59,7 +60,7 @@ public class KpiService {
         // post(URL, lv3, headers);
     }
 
-    // Lv2 바디 생성 (증가율)
+    // Lv2 (증가율)
     private JSONObject buildLv2(String ocrDttm, String trsDttm, double actualRate, double targetRate) throws Exception {
         JSONObject param = new JSONObject()
                 .put("kpiCretKey", CERT_KEY)
@@ -75,7 +76,7 @@ public class KpiService {
                 .put("KPILEVEL2", new JSONArray().put(param));
     }
 
-    // Lv3 바디 생성 (실제 생산량)
+    // Lv3 (실제 생산량)
     private JSONObject buildLv3(String ocrDttm, String trsDttm, int production) throws Exception {
         JSONObject param = new JSONObject()
                 .put("kpiCretKey", CERT_KEY)
