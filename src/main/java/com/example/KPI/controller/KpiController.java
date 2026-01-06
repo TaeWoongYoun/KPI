@@ -7,17 +7,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-
 public class KpiController {
-    @PostMapping("/kpi")
 
-    public String KPI(@RequestBody KpiDto kpiDto) {
+    @PostMapping("/kpi")
+    public String KPI(@RequestBody KpiDto kpiDto) throws Exception {
         KpiService kpiService = new KpiService();
 
-        boolean lv1Result = kpiService.Lv1Service(kpiDto);
-        boolean lv2Result = kpiService.Lv2Service(kpiDto);
+        kpiService.sendKpi(kpiDto);
 
-        String sendData = "Lv1: " + lv1Result + ", Lv2: " + lv2Result;
+        String sendData = "전송 완료";
 
         return sendData;
     }
