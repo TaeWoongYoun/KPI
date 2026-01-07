@@ -1,4 +1,5 @@
 package com.example.KPI.service;
+
 import org.springframework.beans.factory.annotation.Value;
 import com.example.KPI.dto.KpiDto;
 import org.json.JSONArray;
@@ -16,12 +17,15 @@ import java.util.List;
 public class KpiService {
 
     private RestTemplate restTemplate = new RestTemplate();
+
     @Value("${kpi.cert-key}")
-    private String CERT_KEY;
+    private String certKey;
+
     @Value("${kpi.url-lv2}")
-    private String URL_Lv2;
+    private String urlLv2;
+
     @Value("${kpi.url-lv3}")
-    private String URL_Lv3;
+    private String urlLv3;
 
     // 증가율 계산
     public double calculateRate(int beVal, int nowVal) {
@@ -30,6 +34,8 @@ public class KpiService {
 
     // 메인 전송
     public void sendKpi(KpiDto kpiDto) {
+        System.out.println("CERT_KEY: " + certKey);
+
         LocalDateTime now = LocalDateTime.now();
         String trsDttm = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String ocrDttm = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -47,7 +53,7 @@ public class KpiService {
                 kpiDto.getTarget_rate()
         );
 
-         post(URL_Lv2, lv2, headers);
+        post(urlLv2, lv2, headers);
 
         // Lv3 데이터 생성
         JSONObject lv3 = buildLv3(
@@ -56,24 +62,16 @@ public class KpiService {
                 kpiDto.getNow_val()
         );
 
-         post(URL_Lv3, lv3, headers);
-
-// 출력결과 테스트
-//        System.out.println("계산된 증가율: " + actualRate + "%");
-//
-//        System.out.println("Lv2 데이터: " + lv2.toString());
-//
-//        System.out.println("Lv3 데이터: " + lv3.toString());
-
+        post(urlLv3, lv3, headers);
     }
 
     // Lv2 (증가율)
     private JSONObject buildLv2(String ocrDttm, String trsDttm, double actualRate, double targetRate) {
         JSONObject param = new JSONObject()
-                .put("kpiCretKey", CERT_KEY)
+                .put("kpiCertKey", certKey)
                 .put("ocrDttm", ocrDttm)
                 .put("kpiFldCd", "P")
-                .put("kpiDtlCd", "PB")
+                .put("kpiDtlCd", "B")
                 .put("kpiDtlNm", "일 생산량 증가율")
                 .put("achrt", Double.toString(actualRate))
                 .put("targetAchrt", targetRate)
@@ -86,10 +84,10 @@ public class KpiService {
     // Lv3 (실제 생산량)
     private JSONObject buildLv3(String ocrDttm, String trsDttm, int production) {
         JSONObject param = new JSONObject()
-                .put("kpiCretKey", CERT_KEY)
+                .put("kpiCertKey", certKey)
                 .put("ocrDttm", ocrDttm)
                 .put("kpiFldCd", "P")
-                .put("kpiDtlCd", "PB")
+                .put("kpiDtlCd", "B")
                 .put("kpiDtlNm", "일 생산량")
                 .put("msmtVl", production)
                 .put("unt", "EA")
@@ -115,7 +113,7 @@ public class KpiService {
         HttpEntity<String> entity = new HttpEntity<>(body.toString(), headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
-        System.out.println("POST" + url);
-        System.out.println("Response =>" + response.getBody());
+        System.out.println("POST: " + url);
+        System.out.println("Response => " + response.getBody());
     }
 }

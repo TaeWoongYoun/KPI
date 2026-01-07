@@ -16,4 +16,28 @@ public class KpiResponseDto {
         this.sendResult = sendResult;
         this.message = message;
     }
+
+    public int getBe_val() {
+        return be_val;
+    }
+
+    public int getNow_val() {
+        return now_val;
+    }
+
+    public double getTarget_rate() {
+        return target_rate;
+    }
+
+    public double getNow_rate() {
+        return now_rate;
+    }
+
+    public boolean isSendResult() {
+        return sendResult;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }
