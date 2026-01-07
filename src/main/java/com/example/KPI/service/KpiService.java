@@ -1,23 +1,27 @@
 package com.example.KPI.service;
-
+import org.springframework.beans.factory.annotation.Value;
 import com.example.KPI.dto.KpiDto;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class KpiService {
 
     private RestTemplate restTemplate = new RestTemplate();
-    private static final String CERT_KEY = "인증키값";
-    private static final String URL = "외부API주소";
+    @Value("${kpi.cert-key}")
+    private String CERT_KEY;
+    @Value("${kpi.url-lv2}")
+    private String URL_Lv2;
+    @Value("${kpi.url-lv3}")
+    private String URL_Lv3;
 
     // 증가율 계산
     public double calculateRate(int beVal, int nowVal) {
@@ -25,13 +29,15 @@ public class KpiService {
     }
 
     // 메인 전송
-    public void sendKpi(KpiDto kpiDto) throws Exception {
+    public void sendKpi(KpiDto kpiDto) {
         LocalDateTime now = LocalDateTime.now();
         String trsDttm = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String ocrDttm = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
         // 증가율 계산
         double actualRate = calculateRate(kpiDto.getBe_val(), kpiDto.getNow_val());
+
+        HttpHeaders headers = JsonHeader();
 
         // Lv2 데이터 생성
         JSONObject lv2 = buildLv2(
@@ -41,12 +47,16 @@ public class KpiService {
                 kpiDto.getTarget_rate()
         );
 
+         post(URL_Lv2, lv2, headers);
+
         // Lv3 데이터 생성
         JSONObject lv3 = buildLv3(
                 ocrDttm,
                 trsDttm,
                 kpiDto.getNow_val()
         );
+
+         post(URL_Lv3, lv3, headers);
 
 // 출력결과 테스트
 //        System.out.println("계산된 증가율: " + actualRate + "%");
@@ -55,13 +65,10 @@ public class KpiService {
 //
 //        System.out.println("Lv3 데이터: " + lv3.toString());
 
-        // 전송 (헤더는 내일 구현)
-        // post(URL, lv2, headers);
-        // post(URL, lv3, headers);
     }
 
     // Lv2 (증가율)
-    private JSONObject buildLv2(String ocrDttm, String trsDttm, double actualRate, double targetRate) throws Exception {
+    private JSONObject buildLv2(String ocrDttm, String trsDttm, double actualRate, double targetRate) {
         JSONObject param = new JSONObject()
                 .put("kpiCretKey", CERT_KEY)
                 .put("ocrDttm", ocrDttm)
@@ -77,7 +84,7 @@ public class KpiService {
     }
 
     // Lv3 (실제 생산량)
-    private JSONObject buildLv3(String ocrDttm, String trsDttm, int production) throws Exception {
+    private JSONObject buildLv3(String ocrDttm, String trsDttm, int production) {
         JSONObject param = new JSONObject()
                 .put("kpiCretKey", CERT_KEY)
                 .put("ocrDttm", ocrDttm)
@@ -88,13 +95,27 @@ public class KpiService {
                 .put("unt", "EA")
                 .put("trsDttm", trsDttm);
 
-        return new JSONObject()
-                .put("KPILEVEL3", new JSONArray().put(param));
+        return new JSONObject().put("KPILEVEL3", new JSONArray().put(param));
     }
 
-    // 전송 함수 (내일 헤더 추가 예정)
+    public HttpHeaders JsonHeader() {
+        HttpHeaders headers = new HttpHeaders();
+
+        List<MediaType> mediaTypes = new ArrayList<>();
+        mediaTypes.add(MediaType.APPLICATION_JSON);
+        headers.setAccept(mediaTypes);
+
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        return headers;
+    }
+
+    // 전송 함수
     private void post(String url, JSONObject body, HttpHeaders headers) {
         HttpEntity<String> entity = new HttpEntity<>(body.toString(), headers);
-        restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+
+        System.out.println("POST" + url);
+        System.out.println("Response =>" + response.getBody());
     }
 }

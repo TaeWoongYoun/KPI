@@ -1,7 +1,9 @@
 package com.example.KPI.controller;
 
 import com.example.KPI.dto.KpiDto;
+import com.example.KPI.dto.KpiResponseDto;
 import com.example.KPI.service.KpiService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,15 +13,24 @@ import org.springframework.web.bind.annotation.RestController;
 public class KpiController {
 
     @PostMapping("/kpi")
-    public String KPI(@RequestBody KpiDto kpiDto) throws Exception {
+    public ResponseEntity<KpiResponseDto> KPI(@RequestBody KpiDto kpiDto) {
         KpiService kpiService = new KpiService();
 
         kpiService.sendKpi(kpiDto);
 
-        String sendData = "전송 완료";
+        // ResponseDto 생성해서 리턴
+        KpiResponseDto responseDto = new KpiResponseDto(
+                kpiDto.getBe_val(),
+                kpiDto.getNow_val(),
+                kpiDto.getTarget_rate(),
+                0.0,
+                true,
+                "전송 성공성공"
+        );
 
-        return sendData;
+        return ResponseEntity.ok(responseDto);
     }
+}
 
     // 테스트용
 //    @GetMapping("/kpi/test")
@@ -35,4 +46,3 @@ public class KpiController {
 //
 //        return "테스트 완료";
 //    }
-}
