@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+
 public class KpiController {
 //    생성자 주입식으로 수정
     private final KpiService kpiService;

@@ -7,13 +7,6 @@ public class KpiDto {
     private double kpi;
     private String api_key;
     private double target_rate;
-    private double now_rate;
-    private boolean sendResult;
-    private String message;
-
-//    public KpiResponseDto(int be_val, int now_val, double target_rate, ) {
-//
-//    }
 
     public int getBe_val() {
         return be_val;
