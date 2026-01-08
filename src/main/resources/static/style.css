@@ -1,0 +1,110 @@
+body {
+    margin: 30px;
+    background: #f5f5f5;
+}
+
+h1 {
+    color: #333;
+}
+
+h2 {
+    color: #555;
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+.section {
+    background: white;
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin: 10px 0;
+}
+
+.form-group label {
+    display: inline-block;
+    width: 120px;
+    font-weight: bold;
+}
+
+.form-group input, .form-group select {
+    padding: 8px;
+    width: 200px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.kpi-item {
+    background: #f9f9f9;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+
+.kpi-item h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.remove-btn {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    float: right;
+}
+
+.remove-btn:hover {
+    background: #cc0000;
+}
+
+button {
+    padding: 10px 20px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button:hover {
+    background: #45a049;
+}
+
+.send-btn {
+    background: #2196F3;
+    font-size: 16px;
+    padding: 12px 30px;
+}
+
+.send-btn:hover {
+    background: #1976D2;
+}
+
+#result {
+    margin-top: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#result h3 {
+    color: #4CAF50;
+}
+
+.result-item {
+    background: #f0f0f0;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+}
