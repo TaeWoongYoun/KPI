@@ -4,7 +4,7 @@ public class KpiDto {
 
     private int be_val;
     private int now_val;
-    private double kpi;
+//    private double kpi;
     private String api_key;
     private double target_rate;
 
@@ -22,12 +22,12 @@ public class KpiDto {
         this.now_val = now_val;
     }
 
-    public double getKpi() {
-        return kpi;
-    }
-    public void setKpi(double kpi) {
-        this.kpi = kpi;
-    }
+//    public double getKpi() {
+//        return kpi;
+//    }
+//    public void setKpi(double kpi) {
+//        this.kpi = kpi;
+//    }
 
     public String getApi_key() {
         return api_key;

@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 
 public class KpiController {
-//    생성자 주입식으로 수정
+    // 생성자 주입식으로 수정
     private final KpiService kpiService;
     public KpiController(KpiService kpiService) {
         this.kpiService = kpiService;
     }
-//    생성자 주입식으로 수정
+    // 생성자 주입식으로 수정
     @PostMapping("/kpi")
     public ResponseEntity<KpiResponseDto> KPI(@RequestBody KpiDto kpiDto) {
 
@@ -30,7 +30,7 @@ public class KpiController {
                 kpiDto.getTarget_rate(),
                 0.0,
                 true,
-                "전송 성공성공"
+                "전송 성공"
         );
 
         return ResponseEntity.ok(responseDto);
