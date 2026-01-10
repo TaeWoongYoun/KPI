@@ -3,7 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>KPI 전송</title>
-    <link rel="stylesheet" href="/style.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; background: #f5f5f5; }
+        h1 { color: #333; }
+        h2 { color: #555; font-size: 18px; margin-top: 20px; }
+        .section { background: white; padding: 20px; margin: 15px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-group { margin: 10px 0; }
+        .form-group label { display: inline-block; width: 120px; font-weight: bold; }
+        .form-group input, .form-group select { padding: 8px; width: 200px; border: 1px solid #ddd; border-radius: 4px; }
+        .kpi-item { background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 6px; border: 1px solid #e0e0e0; }
+        .kpi-item h3 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
+        .remove-btn { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; float: right; }
+        .remove-btn:hover { background: #cc0000; }
+        button { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #45a049; }
+        .send-btn { background: #2196F3; font-size: 16px; padding: 12px 30px; }
+        .send-btn:hover { background: #1976D2; }
+        #result { margin-top: 20px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        a { text-decoration: none; }
+    </style>
 </head>
 <body>
 <h1>KPI 데이터 전송</h1>
@@ -22,16 +40,145 @@
 
 <div class="section">
     <h2>KPI 항목</h2>
-    <div id="kpiItems">
-        <!--  -->
-    </div>
+    <div id="kpiItems"></div>
     <button type="button" onclick="addItem()">+ 항목 추가</button>
 </div>
 
 <button class="send-btn" onclick="sendKpi()">전송</button>
+<a href="/result"><button type="button">결과 페이지</button></a>
 
 <div id="result"></div>
 
-<script src="/index.js"></script>
+<script>
+    let itemCount = 0;
+
+    window.onload = function() {
+        addItem();
+    };
+
+    function addItem() {
+        itemCount++;
+        const container = document.getElementById('kpiItems');
+
+        const itemHtml = `
+            <div class="kpi-item" id="item${itemCount}">
+                <button type="button" class="remove-btn" onclick="removeItem(${itemCount})">삭제</button>
+                <h3>항목 ${itemCount}</h3>
+
+                <div class="form-group">
+                    <label>분야코드:</label>
+                    <select id="kpiFldCd${itemCount}">
+                        <option value="P">P - 생산성</option>
+                        <option value="Q">Q - 품질</option>
+                        <option value="D">D - 납기</option>
+                        <option value="C">C - 원가</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>세부코드:</label>
+                    <select id="kpiDtlCd${itemCount}">
+                        <option value="A">A</option>
+                        <option value="B" selected>B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                        <option value="E">E</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>항목명:</label>
+                    <input type="text" id="kpiDtlNm${itemCount}" value="일일 생산량 증가">
+                </div>
+
+                <div class="form-group">
+                    <label>단위:</label>
+                    <input type="text" id="unit${itemCount}" value="EA">
+                </div>
+
+                <div class="form-group">
+                    <label>처리주기:</label>
+                    <select id="period${itemCount}">
+                        <option value="일별">일별</option>
+                        <option value="월별">월별</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>현재값(이전):</label>
+                    <input type="number" id="currentValue${itemCount}" value="150">
+                </div>
+
+                <div class="form-group">
+                    <label>목표값:</label>
+                    <input type="number" id="targetValue${itemCount}" value="170">
+                </div>
+
+                <div class="form-group">
+                    <label>실제값:</label>
+                    <input type="number" id="actualValue${itemCount}" value="165">
+                </div>
+            </div>
+        `;
+
+        container.insertAdjacentHTML('beforeend', itemHtml);
+    }
+
+    function removeItem(id) {
+        const item = document.getElementById('item' + id);
+        if (item) {
+            item.remove();
+        }
+    }
+
+    function sendKpi() {
+        const companyName = document.getElementById('companyName').value;
+        const certKey = document.getElementById('certKey').value;
+
+        const kpiItems = [];
+        const itemElements = document.querySelectorAll('.kpi-item');
+
+        itemElements.forEach((item) => {
+            const id = item.id.replace('item', '');
+
+            kpiItems.push({
+                companyName: companyName,
+                certKey: certKey,
+                kpiFldCd: document.getElementById('kpiFldCd' + id).value,
+                kpiDtlCd: document.getElementById('kpiDtlCd' + id).value,
+                kpiDtlNm: document.getElementById('kpiDtlNm' + id).value,
+                unit: document.getElementById('unit' + id).value,
+                period: document.getElementById('period' + id).value,
+                currentValue: parseFloat(document.getElementById('currentValue' + id).value),
+                targetValue: parseFloat(document.getElementById('targetValue' + id).value),
+                actualValue: parseFloat(document.getElementById('actualValue' + id).value)
+            });
+        });
+
+        const requestData = {
+            companyName: companyName,
+            kpiItems: kpiItems
+        };
+
+        console.log('전송 데이터:', requestData);
+
+        fetch('/kpi', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .then(result => {
+            document.getElementById('result').innerHTML =
+                '<h3>전송 완료!</h3>' +
+                '<p>회사명: ' + result.companyName + '</p>' +
+                '<p>전송 항목 수: ' + result.kpiItems.length + '개</p>' +
+                '<p>결과 페이지에서 상세 내용을 확인하세요.</p>';
+        })
+        .catch(error => {
+            document.getElementById('result').innerHTML = '<p style="color:red;">에러: ' + error + '</p>';
+        });
+    }
+</script>
 </body>
 </html>

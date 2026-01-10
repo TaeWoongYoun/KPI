@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>전송 결과</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 50px; }
+        .result-box { padding: 20px; background: #f0f0f0; border-radius: 8px; margin: 20px 0; }
+        .success { color: green; }
+        .fail { color: red; }
+        .item { background: white; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        button { padding: 10px 20px; background: #4CAF50; color: white; border: none; cursor: pointer; margin: 5px; }
+        a { text-decoration: none; }
+    </style>
+</head>
+<body>
+<h1>KPI 전송 결과</h1>
+
+<div class="result-box" id="result">
+    <p>결과를 불러오는 중...</p>
+</div>
+
+<button onclick="loadResult()">새로고침</button>
+<a href="/home"><button type="button">전송 페이지로</button></a>
+
+<script>
+    window.onload = function() {
+        loadResult();
+    };
+
+    function loadResult() {
+        fetch('/kpi/result')
+        .then(response => response.json())
+        .then(result => {
+            let statusClass = result.sendResult ? 'success' : 'fail';
+            let statusText = result.sendResult ? '성공' : '실패';
+
+            let html = '<h3 class="' + statusClass + '">전송 ' + statusText + '</h3>';
+            html += '<p><strong>회사명:</strong> ' + (result.companyName || '-') + '</p>';
+            html += '<p><strong>메시지:</strong> ' + result.message + '</p>';
+
+            if (result.kpiItems && result.kpiItems.length > 0) {
+                html += '<h4>전송된 항목:</h4>';
+                result.kpiItems.forEach((item, index) => {
+                    html += '<div class="item">';
+                    html += '<strong>항목 ' + (index + 1) + ':</strong> ' + item.kpiDtlNm + '<br>';
+                    html += '분야: ' + item.kpiFldCd + ' | 세부: ' + item.kpiDtlCd + '<br>';
+                    html += '현재값: ' + item.currentValue + ' → 실제값: ' + item.actualValue + ' (목표: ' + item.targetValue + ')';
+                    html += '</div>';
+                });
+            }
+
+            document.getElementById('result').innerHTML = html;
+        })
+        .catch(error => {
+            document.getElementById('result').innerHTML = '<p class="fail">에러: ' + error + '</p>';
+        });
+    }
+</script>
+</body>
+</html>
