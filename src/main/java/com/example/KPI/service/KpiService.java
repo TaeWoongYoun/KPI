@@ -25,9 +25,21 @@ public class KpiService {
     @Value("${kpi.url-lv3}")
     private String urlLv3;
 
-    // 증가율 계산
-    public double calculateRate(double currentValue, double actualValue) {
-        return ((actualValue - currentValue) / currentValue) * 100;
+    // 분야코드별 단위 반환
+    public String getUnitByFldCd(String kpiFldCd) {
+        switch (kpiFldCd) {
+            case "P": return "EA";
+            case "Q": return "EA";
+            case "D": return "%";
+            case "C": return "원";
+            default: return "EA";
+        }
+    }
+
+    // 실적 달성률 계산
+    public double calculateRate(double previousValue, double currentValue) {
+        if (previousValue == 0) return 0;
+        return ((currentValue - previousValue) / previousValue) * 100;
     }
 
     public void sendKpi(KpiRequestDto requestDto) {
@@ -38,40 +50,41 @@ public class KpiService {
         HttpHeaders headers = JsonHeader();
 
         for (KpiItemDto item : requestDto.getKpiItems()) {
+            // 단위 자동 설정
+            item.setUnit(getUnitByFldCd(item.getKpiFldCd()));
+
+            // 실적 달성률 계산
+            double achieveRate = calculateRate(item.getPreviousValue(), item.getCurrentValue());
+            item.setAchieveRate(achieveRate);
+
             System.out.println("전송 중: " + item.getCompanyName() + " - " + item.getKpiDtlNm());
 
-            double actualRate = calculateRate(item.getCurrentValue(), item.getActualValue());
-
-            // Lv2 전송 (증가율)
-            JSONObject lv2 = buildLv2(item, ocrDttm, trsDttm, actualRate);
+            // Lv2 전송
+            JSONObject lv2 = buildLv2(item, ocrDttm, trsDttm, achieveRate);
             post(urlLv2, lv2, headers);
 
-            // Lv3 전송 (실제값)
+            // Lv3 전송
             JSONObject lv3 = buildLv3(item, ocrDttm, trsDttm);
             post(urlLv3, lv3, headers);
         }
     }
 
-    // Lv2 (증가율)
-    private JSONObject buildLv2(KpiItemDto item, String ocrDttm, String trsDttm, double actualRate) {
-
-        double targetRate = calculateRate(item.getCurrentValue(), item.getTargetValue());
-
+    // Lv2
+    private JSONObject buildLv2(KpiItemDto item, String ocrDttm, String trsDttm, double achieveRate) {
         JSONObject param = new JSONObject()
                 .put("kpiCertKey", item.getCertKey())
                 .put("ocrDttm", ocrDttm)
                 .put("kpiFldCd", item.getKpiFldCd())
                 .put("kpiDtlCd", item.getKpiDtlCd())
                 .put("kpiDtlNm", item.getKpiDtlNm())
-                .put("achrt", Double.toString(actualRate))
-                .put("targetAchrt", targetRate)
+                .put("achrt", Double.toString(achieveRate))
+                .put("targetAchrt", item.getTargetRate())
                 .put("trsDttm", trsDttm);
 
-        return new JSONObject()
-                .put("KPILEVEL2", new JSONArray().put(param));
+        return new JSONObject().put("KPILEVEL2", new JSONArray().put(param));
     }
 
-    // Lv3 (실제값)
+    // Lv3
     private JSONObject buildLv3(KpiItemDto item, String ocrDttm, String trsDttm) {
         JSONObject param = new JSONObject()
                 .put("kpiCertKey", item.getCertKey())
@@ -79,12 +92,11 @@ public class KpiService {
                 .put("kpiFldCd", item.getKpiFldCd())
                 .put("kpiDtlCd", item.getKpiDtlCd())
                 .put("kpiDtlNm", item.getKpiDtlNm())
-                .put("msmtVl", item.getActualValue())
+                .put("msmtVl", item.getCurrentValue())
                 .put("unt", item.getUnit())
                 .put("trsDttm", trsDttm);
 
-        return new JSONObject()
-                .put("KPILEVEL3", new JSONArray().put(param));
+        return new JSONObject().put("KPILEVEL3", new JSONArray().put(param));
     }
 
     // HTTP 헤더
@@ -100,7 +112,7 @@ public class KpiService {
         return headers;
     }
 
-    // ㅖㅒㄴㅆ 전송
+    // POST 전송
     private void post(String url, JSONObject body, HttpHeaders headers) {
         try {
             HttpEntity<String> entity = new HttpEntity<>(body.toString(), headers);
@@ -110,7 +122,7 @@ public class KpiService {
             System.out.println("Response => " + response.getBody());
         } catch (Exception e) {
             System.out.println("전송 실패: " + url);
-            System.out.println("ERROR!!!!!! :  " + e.getMessage());
+            System.out.println("ERROR: " + e.getMessage());
         }
     }
 }

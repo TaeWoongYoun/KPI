@@ -4,13 +4,22 @@
     <meta charset="UTF-8">
     <title>전송 결과</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 50px; }
-        .result-box { padding: 20px; background: #f0f0f0; border-radius: 8px; margin: 20px 0; }
+        body { font-family: Arial, sans-serif; margin: 30px; background: #f5f5f5; }
+        h1 { color: #333; }
+        .result-box { padding: 20px; background: white; border-radius: 8px; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .success { color: green; }
         .fail { color: red; }
-        .item { background: white; padding: 10px; margin: 10px 0; border-radius: 4px; }
-        button { padding: 10px 20px; background: #4CAF50; color: white; border: none; cursor: pointer; margin: 5px; }
+        .item { background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 6px; border: 1px solid #e0e0e0; }
+        .item h4 { margin: 0 0 10px 0; color: #333; }
+        .rate { display: inline-block; padding: 5px 10px; border-radius: 4px; margin: 5px 5px 5px 0; }
+        .rate-achieve { background: #e3f2fd; color: #1976D2; }
+        .rate-target { background: #e8f5e9; color: #388E3C; }
+        button { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #45a049; }
         a { text-decoration: none; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f0f0f0; }
     </style>
 </head>
 <body>
@@ -35,17 +44,28 @@
             let statusClass = result.sendResult ? 'success' : 'fail';
             let statusText = result.sendResult ? '성공' : '실패';
 
-            let html = '<h3 class="' + statusClass + '">전송 ' + statusText + '</h3>';
+            let html = '<h2 class="' + statusClass + '">전송 ' + statusText + '</h2>';
             html += '<p><strong>회사명:</strong> ' + (result.companyName || '-') + '</p>';
             html += '<p><strong>메시지:</strong> ' + result.message + '</p>';
 
             if (result.kpiItems && result.kpiItems.length > 0) {
-                html += '<h4>전송된 항목:</h4>';
+                html += '<h3>전송된 항목 (' + result.kpiItems.length + '건)</h3>';
+
                 result.kpiItems.forEach((item, index) => {
                     html += '<div class="item">';
-                    html += '<strong>항목 ' + (index + 1) + ':</strong> ' + item.kpiDtlNm + '<br>';
-                    html += '분야: ' + item.kpiFldCd + ' | 세부: ' + item.kpiDtlCd + '<br>';
-                    html += '현재값: ' + item.currentValue + ' → 실제값: ' + item.actualValue + ' (목표: ' + item.targetValue + ')';
+                    html += '<h4>' + (index + 1) + '. ' + item.kpiDtlNm + '</h4>';
+
+                    html += '<table>';
+                    html += '<tr><th>분야</th><td>' + item.kpiFldCd + '</td><th>세부코드</th><td>' + item.kpiDtlCd + '</td></tr>';
+                    html += '<tr><th>단위</th><td>' + item.unit + '</td><th>처리주기</th><td>' + item.period + '</td></tr>';
+                    html += '<tr><th>이전값</th><td>' + item.previousValue + '</td><th>현재값</th><td>' + item.currentValue + '</td></tr>';
+                    html += '</table>';
+
+                    html += '<div style="margin-top: 10px;">';
+                    html += '<span class="rate rate-achieve">실적 달성률: ' + item.achieveRate.toFixed(2) + '%</span>';
+                    html += '<span class="rate rate-target">목표 달성률: ' + item.targetRate.toFixed(2) + '%</span>';
+                    html += '</div>';
+
                     html += '</div>';
                 });
             }

@@ -9,11 +9,12 @@ public class KpiItemDto {
     private String kpiDtlNm;
     private String unit;
     private String period;
-    private double targetValue;
+    private double previousValue;
     private double currentValue;
-    private double actualValue;
+    private double targetRate;
+    private double achieveRate;
 
-    //get set 모음
+    // get set 모음
     public String getCompanyName() {
         return companyName;
     }
@@ -63,11 +64,11 @@ public class KpiItemDto {
         this.period = period;
     }
 
-    public double getTargetValue() {
-        return targetValue;
+    public double getPreviousValue() {
+        return previousValue;
     }
-    public void setTargetValue(double targetValue) {
-        this.targetValue = targetValue;
+    public void setPreviousValue(double previousValue) {
+        this.previousValue = previousValue;
     }
 
     public double getCurrentValue() {
@@ -77,10 +78,17 @@ public class KpiItemDto {
         this.currentValue = currentValue;
     }
 
-    public double getActualValue() {
-        return actualValue;
+    public double getTargetRate() {
+        return targetRate;
     }
-    public void setActualValue(double actualValue) {
-        this.actualValue = actualValue;
+    public void setTargetRate(double targetRate) {
+        this.targetRate = targetRate;
+    }
+
+    public double getAchieveRate() {
+        return achieveRate;
+    }
+    public void setAchieveRate(double achieveRate) {
+        this.achieveRate = achieveRate;
     }
 }
