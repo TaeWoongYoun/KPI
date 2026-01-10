@@ -22,6 +22,7 @@
         .send-btn:hover { background: #1976D2; }
         #result { margin-top: 20px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         a { text-decoration: none; }
+        .info { color: #666; font-size: 12px; margin-left: 10px; }
     </style>
 </head>
 <body>
@@ -67,6 +68,11 @@
     function updateUnit(itemId) {
         const fldCd = document.getElementById('kpiFldCd' + itemId).value;
         document.getElementById('unit' + itemId).innerText = unitMap[fldCd];
+    }
+
+    // 랜덤 값 생성 (100 ~ 150)
+    function getRandomValue() {
+        return Math.floor(Math.random() * 51) + 100;
     }
 
     function addItem() {
@@ -118,13 +124,14 @@
                 </div>
 
                 <div class="form-group">
-                    <label>이전값:</label>
+                    <label>초기값:</label>
                     <input type="number" id="previousValue${itemCount}" value="100">
                 </div>
 
                 <div class="form-group">
                     <label>현재값:</label>
-                    <input type="number" id="currentValue${itemCount}" value="120">
+                    <span id="currentValue${itemCount}">전송 시 랜덤 생성 (100~150)</span>
+                    <span class="info">* 자동 생성</span>
                 </div>
 
                 <div class="form-group">
@@ -155,6 +162,9 @@
             const id = item.id.replace('item', '');
             const fldCd = document.getElementById('kpiFldCd' + id).value;
 
+            // 현재값 랜덤 생성
+            const currentValue = getRandomValue();
+
             kpiItems.push({
                 companyName: companyName,
                 certKey: certKey,
@@ -164,7 +174,7 @@
                 unit: unitMap[fldCd],
                 period: document.getElementById('period' + id).value,
                 previousValue: parseFloat(document.getElementById('previousValue' + id).value),
-                currentValue: parseFloat(document.getElementById('currentValue' + id).value),
+                currentValue: currentValue,
                 targetRate: parseFloat(document.getElementById('targetRate' + id).value)
             });
         });

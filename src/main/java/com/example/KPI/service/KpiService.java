@@ -2,13 +2,14 @@ package com.example.KPI.service;
 
 import com.example.KPI.dto.KpiItemDto;
 import com.example.KPI.dto.KpiRequestDto;
+import com.example.KPI.entity.KpiRecord;
+import com.example.KPI.repository.KpiRecordRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.List;
 public class KpiService {
 
     private RestTemplate restTemplate = new RestTemplate();
+    private final KpiRecordRepository kpiRecordRepository;
 
     @Value("${kpi.url-lv2}")
     private String urlLv2;
@@ -25,7 +27,10 @@ public class KpiService {
     @Value("${kpi.url-lv3}")
     private String urlLv3;
 
-    // 분야코드별 단위 반환
+    public KpiService(KpiRecordRepository kpiRecordRepository) {
+        this.kpiRecordRepository = kpiRecordRepository;
+    }
+
     public String getUnitByFldCd(String kpiFldCd) {
         switch (kpiFldCd) {
             case "P": return "EA";
@@ -66,7 +71,34 @@ public class KpiService {
             // Lv3 전송
             JSONObject lv3 = buildLv3(item, ocrDttm, trsDttm);
             post(urlLv3, lv3, headers);
+
+            // DB 저장
+            saveRecord(item, achieveRate);
         }
+    }
+
+    // DB 저장
+    private void saveRecord(KpiItemDto item, double achieveRate) {
+        KpiRecord record = new KpiRecord();
+        record.setCompanyName(item.getCompanyName());
+        record.setCertKey(item.getCertKey());
+        record.setKpiFldCd(item.getKpiFldCd());
+        record.setKpiDtlCd(item.getKpiDtlCd());
+        record.setKpiDtlNm(item.getKpiDtlNm());
+        record.setUnit(item.getUnit());
+        record.setPeriod(item.getPeriod());
+        record.setPreviousValue(item.getPreviousValue());
+        record.setCurrentValue(item.getCurrentValue());
+        record.setTargetRate(item.getTargetRate());
+        record.setAchieveRate(achieveRate);
+
+        kpiRecordRepository.save(record);
+        System.out.println("DB 저장 완료: " + item.getKpiDtlNm());
+    }
+
+    // 전체 기록 조회
+    public List<KpiRecord> getAllRecords() {
+        return kpiRecordRepository.findAllByOrderByCreatedAtDesc();
     }
 
     // Lv2
