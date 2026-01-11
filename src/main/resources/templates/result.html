@@ -3,28 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>전송 결과</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 30px; background: #f5f5f5; }
-        h1 { color: #333; }
-        .section { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .success { color: green; }
-        .fail { color: red; }
-        .record { background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 6px; border: 1px solid #e0e0e0; }
-        .record h4 { margin: 0 0 10px 0; color: #333; }
-        .rate { display: inline-block; padding: 5px 10px; border-radius: 4px; margin: 5px 5px 5px 0; }
-        .rate-achieve { background: #e3f2fd; color: #1976D2; }
-        .rate-target { background: #e8f5e9; color: #388E3C; }
-        button { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
-        button:hover { background: #45a049; }
-        a { text-decoration: none; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background: #f0f0f0; }
-        .time { color: #666; font-size: 12px; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab { padding: 10px 20px; background: #ddd; border: none; border-radius: 4px; cursor: pointer; }
-        .tab.active { background: #2196F3; color: white; }
-    </style>
+    <link rel="stylesheet" href="/css/result.css">
 </head>
 <body>
 <h1>KPI 전송 결과</h1>
@@ -45,108 +24,6 @@
 <button onclick="loadAll()">새로고침</button>
 <a href="/home"><button type="button">전송 페이지로</button></a>
 
-<script>
-    window.onload = function() {
-        loadAll();
-    };
-
-    function loadAll() {
-        loadLastResult();
-        loadHistory();
-    }
-
-    function showTab(tab) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-
-        if (tab === 'last') {
-            document.getElementById('lastResult').style.display = 'block';
-            document.getElementById('historyResult').style.display = 'none';
-            document.querySelectorAll('.tab')[0].classList.add('active');
-        } else {
-            document.getElementById('lastResult').style.display = 'none';
-            document.getElementById('historyResult').style.display = 'block';
-            document.querySelectorAll('.tab')[1].classList.add('active');
-        }
-    }
-
-    // 마지막 전송 결과
-    function loadLastResult() {
-        fetch('/kpi/result')
-        .then(response => response.json())
-        .then(result => {
-            let statusClass = result.sendResult ? 'success' : 'fail';
-            let statusText = result.sendResult ? '성공' : '실패';
-
-            let html = '<h2 class="' + statusClass + '">전송 ' + statusText + '</h2>';
-            html += '<p><strong>회사명:</strong> ' + (result.companyName || '-') + '</p>';
-            html += '<p><strong>메시지:</strong> ' + result.message + '</p>';
-
-            if (result.kpiItems && result.kpiItems.length > 0) {
-                html += '<h3>전송된 항목 (' + result.kpiItems.length + '건)</h3>';
-
-                result.kpiItems.forEach((item, index) => {
-                    html += '<div class="record">';
-                    html += '<h4>' + (index + 1) + '. ' + item.kpiDtlNm + '</h4>';
-
-                    html += '<table>';
-                    html += '<tr><th>분야</th><td>' + item.kpiFldCd + '</td><th>세부코드</th><td>' + item.kpiDtlCd + '</td></tr>';
-                    html += '<tr><th>단위</th><td>' + item.unit + '</td><th>처리주기</th><td>' + item.period + '</td></tr>';
-                    html += '<tr><th>이전값</th><td>' + item.previousValue + '</td><th>현재값</th><td>' + item.currentValue + '</td></tr>';
-                    html += '</table>';
-
-                    html += '<div style="margin-top: 10px;">';
-                    html += '<span class="rate rate-achieve">실적 달성률: ' + item.achieveRate.toFixed(2) + '%</span>';
-                    html += '<span class="rate rate-target">목표 달성률: ' + item.targetRate.toFixed(2) + '%</span>';
-                    html += '</div>';
-
-                    html += '</div>';
-                });
-            }
-
-            document.getElementById('lastResult').innerHTML = html;
-        })
-        .catch(error => {
-            document.getElementById('lastResult').innerHTML = '<p class="fail">에러: ' + error + '</p>';
-        });
-    }
-
-    // DB 전송 기록
-    function loadHistory() {
-        fetch('/kpi/records')
-        .then(response => response.json())
-        .then(records => {
-            if (records.length === 0) {
-                document.getElementById('historyResult').innerHTML = '<p>저장된 기록이 없습니다.</p>';
-                return;
-            }
-
-            let html = '<h2>전송 기록 (' + records.length + '건)</h2>';
-
-            records.forEach((record, index) => {
-                html += '<div class="record">';
-                html += '<h4>' + (index + 1) + '. ' + record.kpiDtlNm + '</h4>';
-                html += '<p class="time">전송일시: ' + record.createdAt + '</p>';
-
-                html += '<table>';
-                html += '<tr><th>회사명</th><td>' + record.companyName + '</td><th>분야</th><td>' + record.kpiFldCd + '</td></tr>';
-                html += '<tr><th>세부코드</th><td>' + record.kpiDtlCd + '</td><th>단위</th><td>' + record.unit + '</td></tr>';
-                html += '<tr><th>이전값</th><td>' + record.previousValue + '</td><th>현재값</th><td>' + record.currentValue + '</td></tr>';
-                html += '</table>';
-
-                html += '<div style="margin-top: 10px;">';
-                html += '<span class="rate rate-achieve">실적 달성률: ' + record.achieveRate.toFixed(2) + '%</span>';
-                html += '<span class="rate rate-target">목표 달성률: ' + record.targetRate.toFixed(2) + '%</span>';
-                html += '</div>';
-
-                html += '</div>';
-            });
-
-            document.getElementById('historyResult').innerHTML = html;
-        })
-        .catch(error => {
-            document.getElementById('historyResult').innerHTML = '<p class="fail">에러: ' + error + '</p>';
-        });
-    }
-</script>
+<script src="/js/result.js"></script>
 </body>
 </html>

@@ -1,0 +1,150 @@
+    let itemCount = 0;
+
+    const unitMap = {
+        'P': 'EA',
+        'Q': 'EA',
+        'D': '%',
+        'C': '원'
+    };
+
+    window.onload = function() {
+        addItem();
+    };
+
+    function updateUnit(itemId) {
+        const fldCd = document.getElementById('kpiFldCd' + itemId).value;
+        document.getElementById('unit' + itemId).innerText = unitMap[fldCd];
+    }
+
+    // 랜덤 값 생성 (100 ~ 150)
+    function getRandomValue() {
+        return Math.floor(Math.random() * 51) + 100;
+    }
+
+    function addItem() {
+        itemCount++;
+        const container = document.getElementById('kpiItems');
+
+        const itemHtml = `
+            <div class="kpi-item" id="item${itemCount}">
+                <button type="button" class="remove-btn" onclick="removeItem(${itemCount})">삭제</button>
+                <h3>항목 ${itemCount}</h3>
+
+                <div class="form-group">
+                    <label>분야코드:</label>
+                    <select id="kpiFldCd${itemCount}" onchange="updateUnit(${itemCount})">
+                        <option value="P">P - 생산성</option>
+                        <option value="Q">Q - 품질</option>
+                        <option value="D">D - 납기</option>
+                        <option value="C">C - 원가</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>세부코드:</label>
+                    <select id="kpiDtlCd${itemCount}">
+                        <option value="A">A</option>
+                        <option value="B" selected>B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                        <option value="E">E</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>항목명:</label>
+                    <input type="text" id="kpiDtlNm${itemCount}" value="일일 생산량 증가">
+                </div>
+
+                <div class="form-group">
+                    <label>단위:</label>
+                    <span id="unit${itemCount}">EA</span>
+                </div>
+
+                <div class="form-group">
+                    <label>처리주기:</label>
+                    <select id="period${itemCount}">
+                        <option value="일별">일별</option>
+                        <option value="월별">월별</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>초기값:</label>
+                    <input type="number" id="previousValue${itemCount}" value="100">
+                </div>
+
+                <div class="form-group">
+                    <label>현재값:</label>
+                    <span id="currentValue${itemCount}">전송 시 랜덤 생성 (100~150)</span>
+                </div>
+
+                <div class="form-group">
+                    <label>목표율 (%):</label>
+                    <input type="number" id="targetRate${itemCount}" step="0.1" value="20">
+                </div>
+            </div>
+        `;
+
+        container.insertAdjacentHTML('beforeend', itemHtml);
+    }
+
+    function removeItem(id) {
+        const item = document.getElementById('item' + id);
+        if (item) {
+            item.remove();
+        }
+    }
+
+    function sendKpi() {
+        const companyName = document.getElementById('companyName').value;
+        const certKey = document.getElementById('certKey').value;
+
+        const kpiItems = [];
+        const itemElements = document.querySelectorAll('.kpi-item');
+
+        itemElements.forEach((item) => {
+            const id = item.id.replace('item', '');
+            const fldCd = document.getElementById('kpiFldCd' + id).value;
+
+            // 현재값 랜덤 생성
+            const currentValue = getRandomValue();
+
+            kpiItems.push({
+                companyName: companyName,
+                certKey: certKey,
+                kpiFldCd: fldCd,
+                kpiDtlCd: document.getElementById('kpiDtlCd' + id).value,
+                kpiDtlNm: document.getElementById('kpiDtlNm' + id).value,
+                unit: unitMap[fldCd],
+                period: document.getElementById('period' + id).value,
+                previousValue: parseFloat(document.getElementById('previousValue' + id).value),
+                currentValue: currentValue,
+                targetRate: parseFloat(document.getElementById('targetRate' + id).value)
+            });
+        });
+
+        const requestData = {
+            companyName: companyName,
+            kpiItems: kpiItems
+        };
+
+        console.log('전송 데이터:', requestData);
+
+        fetch('/kpi', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .then(result => {
+            document.getElementById('result').innerHTML =
+                '<h3>전송 완료!</h3>' +
+                '<p>회사명: ' + result.companyName + '</p>' +
+                '<p>전송 항목 수: ' + result.kpiItems.length + '개</p>' +
+                '<p>결과 페이지에서 상세 내용을 확인하세요.</p>';
+        })
+        .catch(error => {
+            document.getElementById('result').innerHTML = '<p style="color:red;">에러: ' + error + '</p>';
+        });
+    }
